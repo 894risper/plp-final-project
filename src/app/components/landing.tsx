@@ -1,16 +1,14 @@
+"use client"
 import React, { useState, useEffect } from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
-import { Button } from "./components/ui/button";
-import { Badge } from "./components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, FileText, Users, DollarSign, Shield, LogOut } from 'lucide-react';
-import { toast } from "sonner@2.0.3";
-import { ContractsTable } from './components/ContractsTable';
-import { AnomalyDashboard } from './components/AnomalyDashboard';
-import { VendorProfiles } from './components/VendorProfiles';
-import { DataVisualization } from './components/DataVisualization';
-import { WhistleblowerPortal } from './components/WhistleblowerPortal';
-import { LoginForm } from './app/LoginForm';
+import { toast } from "sonner"
+
+import { LoginForm } from './login';
+
 
 interface User {
     id: string;
@@ -18,7 +16,7 @@ interface User {
     role: 'public' | 'journalist' | 'admin';
 }
 
-export default function App() {
+export default function Landing() {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
@@ -155,26 +153,7 @@ export default function App() {
                         </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="contracts">
-                        <ContractsTable userRole={user.role} />
-                    </TabsContent>
-
-                    <TabsContent value="anomalies">
-                        <AnomalyDashboard userRole={user.role} />
-                    </TabsContent>
-
-                    <TabsContent value="vendors">
-                        <VendorProfiles userRole={user.role} />
-                    </TabsContent>
-
-                    <TabsContent value="analytics">
-                        <DataVisualization userRole={user.role} />
-                    </TabsContent>
-
-                    <TabsContent value="whistleblower">
-                        <WhistleblowerPortal userRole={user.role} />
-                    </TabsContent>
-                </Tabs>
+                      </Tabs> 
             </div>
         </div>
     );
