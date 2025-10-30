@@ -1,7 +1,9 @@
-@import "../../../node_modules/tailwindcss/dist/lib.d.mts";
+
 
 @plugin "tailwindcss-animate";
-@import "../../../node_modules/tw-animate-css/dist/tw-animate.css";
+@import "tailwindcss";
+
+
 
 @custom-variant dark (&:is(.dark *));
 
