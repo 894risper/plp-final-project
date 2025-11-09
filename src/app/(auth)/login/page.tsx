@@ -1,12 +1,12 @@
+import Login from '@/app/components/login'
 import React from 'react'
-import { LoginForm } from '@/app/components/login'
-const Login = () => {
+
+const page = () => {
   return (
     <div>
-
-<LoginForm/>
+      <Login/>
     </div>
   )
 }
 
-export default Login
+export default page
