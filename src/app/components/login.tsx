@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import {useForm} from "react-hook-form"
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import {signIn} from "next-auth/react"
+import {toast} from "react-hot-toast"
 type Inputs={
   email:string,
   password:string,
@@ -18,6 +20,21 @@ const Login = () => {
   const router = useRouter()
   const handleFormSubmit= async(data:Inputs) =>{
 try{
+const res = await signIn('credentials', {
+                email: data.email,
+                password: data.password,
+                redirect: false
+            });
+
+            if (res?.ok) {
+                toast.success("Login successful!");
+                reset();
+                
+                    router.push("/landing"); 
+                
+            } else {
+                toast.error(res?.error || "Login failed");
+            }
 
 }catch(error){
 
