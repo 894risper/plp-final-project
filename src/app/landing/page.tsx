@@ -1,12 +1,6 @@
-import React from 'react'
+"use client"
 import Landing from '../components/landing'
 
-const page = () => {
-  return (
-    <div>
-<Landing/>
-    </div>
-  )
+export default function LandingPage() {
+  return <Landing />
 }
-
-export default page

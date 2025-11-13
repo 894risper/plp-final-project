@@ -1,4 +1,3 @@
-// models/users.ts
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
 export interface IUser extends Document {
@@ -31,7 +30,7 @@ const userSchema = new Schema<IUser>({
         enum: ['pending', 'active', 'suspended'],
         default: 'active' 
     },
-    organization: { type: String } // Simple field for journalist's organization
+    organization: { type: String }
 }, { 
     timestamps: true 
 });
