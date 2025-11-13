@@ -1,3 +1,4 @@
+
 "use client"
 import React from 'react'
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,12 @@ import {toast} from "react-hot-toast"
 type Inputs={
   email:string,
   password:string,
+import React from 'react'
+
+const Login = () => {
+  return (
+    <div>login</div>
+  )
 }
 const Login = () => {
   const {register,handleSubmit,formState,reset}=useForm<Inputs>();
@@ -24,8 +31,7 @@ const res = await signIn('credentials', {
                 email: data.email,
                 password: data.password,
                 redirect: false
-            });
-
+            
             if (res?.ok) {
                 toast.success("Login successful!");
                 reset();
@@ -109,6 +115,4 @@ const res = await signIn('credentials', {
       </Card>
     </div>
   )
-}
-
 export default Login
