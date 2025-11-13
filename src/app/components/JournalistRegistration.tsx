@@ -1,0 +1,184 @@
+
+"use client"
+import React, { useState } from 'react'
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
+import { Shield } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useForm } from "react-hook-form"
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { toast } from "react-hot-toast"
+
+type Inputs = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  password: string;
+  organization: string;
+}
+
+interface JournalistRegistrationProps {
+  onSuccess?: () => void;
+  showBackButton?: boolean;
+}
+
+export default function JournalistRegistration({ 
+  onSuccess, 
+  showBackButton = true 
+}: JournalistRegistrationProps) {
+  const { register, handleSubmit, formState } = useForm<Inputs>();
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleFormSubmit = async (data: Inputs) => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...data,
+          role: 'journalist'
+        })
+      });
+      
+      const result = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(result.message || "Registration failed");
+      }
+
+      toast.success("Journalist account created! Please login.");
+      
+      
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        router.push('/login');
+      }
+      
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Registration failed";
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className='min-h-screen bg-gray-50 flex items-center justify-center px-4'>
+      <Card className='w-full max-w-md'>
+        <CardHeader className='text-center'>
+          <div className='flex justify-center mb-4'>
+            <Shield className="h-12 w-12 text-blue-600" />
+          </div>
+          <CardTitle className='text-2xl'>Journalist Sign Up</CardTitle>
+          <CardDescription>
+            Create your journalist account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+            <div>
+              <Label htmlFor='firstName'>First Name</Label>
+              <Input
+                id='firstName'
+                type="text"
+                {...register('firstName', { required: "First name is required" })}
+              />
+              {formState.errors.firstName && 
+                <p className='text-red-500 text-sm'>{formState.errors.firstName.message}</p>
+              }
+            </div>
+
+            <div>
+              <Label htmlFor='lastName'>Last Name</Label>
+              <Input
+                id='lastName'
+                type='text'
+                {...register('lastName', { required: "Last name is required" })}
+              />
+              {formState.errors.lastName && 
+                <p className='text-red-500 text-sm'>{formState.errors.lastName.message}</p>
+              }
+            </div>
+
+            <div>
+              <Label htmlFor='organization'>Media Organization</Label>
+              <Input
+                id='organization'
+                type='text'
+                {...register('organization', { required: "Organization is required" })}
+                placeholder="e.g., CNN, BBC, New York Times"
+              />
+              {formState.errors.organization && 
+                <p className='text-red-500 text-sm'>{formState.errors.organization.message}</p>
+              }
+            </div>
+
+            <div>
+              <Label htmlFor='email'>Email</Label>
+              <Input
+                id='email'
+                type='email'
+                {...register('email', { required: "Email is required" })}
+              />
+              {formState.errors.email && 
+                <p className='text-red-500 text-sm'>{formState.errors.email.message}</p>
+              }
+            </div>
+
+            <div>
+              <Label htmlFor='phone'>Phone</Label>
+              <Input
+                id='phone'
+                type='tel'
+                {...register("phone", { required: "Phone is required" })}
+              />
+              {formState.errors.phone &&
+                <p className='text-red-500 text-sm'>{formState.errors.phone.message}</p>
+              }
+            </div>
+
+            <div>
+              <Label htmlFor='password'>Password</Label>
+              <Input 
+                id='password'
+                type='password'
+                {...register("password", { 
+                  required: "Password is required",
+                  minLength: { value: 6, message: "Minimum 6 characters" }
+                })}
+              />
+              {formState.errors.password &&
+                <p className='text-red-500 text-sm'>{formState.errors.password.message}</p>
+              }
+            </div>
+
+            <Button 
+              className='w-full bg-blue-600' 
+              type='submit'
+              disabled={loading}
+            >
+              {loading ? 'Creating Account...' : 'Create Journalist Account'}
+            </Button>
+
+            {showBackButton && (
+              <div className="text-center">
+                <Link className='text-sm text-blue-600 hover:underline' href={'/registration'}>
+                  Register as regular user instead
+                </Link>
+              </div>
+            )}
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}
