@@ -1,10 +1,11 @@
-import Registration from '@/app/components/registration'
+import Register from '@/app/components/registration'
+
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-        <Registration/>
+        <Register></Register>
     </div>
   )
 }
