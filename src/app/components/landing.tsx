@@ -32,12 +32,32 @@ export default function Landing() {
         if (savedUser) {
             setUser(JSON.parse(savedUser));
         }
-        setLoading(false);
+        // Fetch stats from backend
+        const fetchStats = async () => {
+            try {
+                const res = await fetch((process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000/api') + '/stats');
+                if (res.ok) {
+                    const data = await res.json();
+                    setStats({
+                        totalContracts: data.totalContracts,
+                        totalValue: data.totalValue,
+                        flaggedContracts: data.flaggedContracts,
+                        activeVendors: data.activeVendors
+                    });
+                }
+            } catch (e) {
+                console.warn('Failed to load stats from backend, using defaults');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchStats();
     }, []);
 
     const handleSignOut = () => {
         setUser(null);
         localStorage.removeItem('corruption-tracker-user');
+        localStorage.removeItem('corruption-tracker-token');
         toast.success('Signed out successfully');
     };
 

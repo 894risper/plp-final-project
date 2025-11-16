@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/button';
 import { useForm } from "react-hook-form"
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { toast } from "react-hot-toast"
+import { toast } from "sonner"
 import JournalistRegistration from './JournalistRegistration';
+import { apiFetch } from '@/lib/api';
 
 type Inputs = {
   firstName: string;
@@ -29,16 +30,20 @@ const Register = () => {
   const handleFormSubmit = async (data: Inputs) => {
     setLoading(true);
     try {
-      const res = await fetch("api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data)
+      const res = await apiFetch('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password,
+          role: 'public',
+          firstName: data.firstName,
+          lastName: data.lastName,
+          phone: data.phone
+        })
       });
-      const result = await res.json();
-      if (!res.ok) {
-        throw new Error(result.message || "Failed to register user");
+      if (res?.token) {
+        localStorage.setItem('corruption-tracker-token', res.token);
+        localStorage.setItem('corruption-tracker-user', JSON.stringify(res.user));
       }
       toast.success("Registration successful!");
       reset();
