@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectMongoDB } from '../../../../lib/mongodb';
+import { connectMongoDB } from '../../../lib/mongodb';
 import Contract from '../../../../models/Contract';
 import Vendor from '../../../../models/vendor';
 import Anomaly from '../../../../models/Anomaly';

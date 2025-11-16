@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 
-import { connectMongoDB } from '../../../../lib/mongodb';
+import { connectMongoDB } from '../../../lib/mongodb';
 
 export async function GET(request: Request) {
   try {
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
         startDate.setMonth(now.getMonth() - 12);
     }
 
-    // Mock data for demonstration - replace with actual aggregations
+    
     const spendingByMinistry = [
       { ministry: 'Health', amount: 450000000, contracts: 1243 },
       { ministry: 'Defense', amount: 680000000, contracts: 892 },

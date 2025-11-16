@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { connectMongoDB } from '../../../../lib/mongodb';
+import { connectMongoDB } from '../../../lib/mongodb';
 import WhistleblowerReport from '../../../../models/WhistleblowerReport';
 
 export async function GET() {
@@ -29,12 +29,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    await connectToDatabase();
+    await  connectMongoDB();
 
     const body = await request.json();
     const { title, category, severity, ministry, vendor, contract_id, description, is_anonymous, contact_info } = body;
 
-    // Generate report ID
+
     const reportCount = await WhistleblowerReport.countDocuments();
     const report_id = `WB-${new Date().getFullYear()}-${(reportCount + 1).toString().padStart(3, '0')}`;
 

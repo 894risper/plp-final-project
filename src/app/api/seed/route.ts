@@ -1,6 +1,6 @@
 // app/api/seed/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { seedAdmin } from "../../../../lib/seed-admin";
+import { seedAdmin } from "@/lib/seed-admin";
 
 export async function GET(request: NextRequest) {
     try {

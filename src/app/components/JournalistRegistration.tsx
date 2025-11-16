@@ -1,4 +1,3 @@
-
 "use client"
 import React, { useState } from 'react'
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useForm } from "react-hook-form"
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { toast } from "react-hot-toast"
+import { toast } from "sonner"  // Changed from react-hot-toast
 
 type Inputs = {
   firstName: string;
@@ -51,11 +50,10 @@ export default function JournalistRegistration({
       const result = await res.json();
       
       if (!res.ok) {
-        throw new Error(result.message || "Registration failed");
+        throw new Error(result.error || "Registration failed");
       }
 
-      toast.success("Journalist account created! Please login.");
-      
+      toast.success("Journalist account created! Awaiting admin approval.");
       
       if (onSuccess) {
         onSuccess();
@@ -63,9 +61,9 @@ export default function JournalistRegistration({
         router.push('/login');
       }
       
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Registration failed";
-      toast.error(errorMessage);
+    } catch (error: any) {
+      toast.error(error.message || "Registration failed");
+      console.error("Journalist registration error:", error);
     } finally {
       setLoading(false);
     }
@@ -80,99 +78,144 @@ export default function JournalistRegistration({
           </div>
           <CardTitle className='text-2xl'>Journalist Sign Up</CardTitle>
           <CardDescription>
-            Create your journalist account
+            Apply for journalist access (requires admin approval)
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor='firstName'>First Name</Label>
-              <Input
-                id='firstName'
-                type="text"
-                {...register('firstName', { required: "First name is required" })}
-              />
-              {formState.errors.firstName && 
-                <p className='text-red-500 text-sm'>{formState.errors.firstName.message}</p>
-              }
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor='firstName'>First Name *</Label>
+                <Input
+                  id='firstName'
+                  type="text"
+                  {...register('firstName', { 
+                    required: "First name is required",
+                    pattern: {
+                      value: /^[a-zA-Z]+$/,
+                      message: "First name should only contain letters"
+                    }
+                  })}
+                />
+                {formState.errors.firstName && 
+                  <p className='text-red-500 text-sm mt-1'>{formState.errors.firstName.message}</p>
+                }
+              </div>
+
+              <div>
+                <Label htmlFor='lastName'>Last Name *</Label>
+                <Input
+                  id='lastName'
+                  type='text'
+                  {...register('lastName', { 
+                    required: "Last name is required",
+                    pattern: {
+                      value: /^[a-zA-Z]+$/,
+                      message: "Last name should only contain letters"
+                    }
+                  })}
+                />
+                {formState.errors.lastName && 
+                  <p className='text-red-500 text-sm mt-1'>{formState.errors.lastName.message}</p>
+                }
+              </div>
             </div>
 
             <div>
-              <Label htmlFor='lastName'>Last Name</Label>
-              <Input
-                id='lastName'
-                type='text'
-                {...register('lastName', { required: "Last name is required" })}
-              />
-              {formState.errors.lastName && 
-                <p className='text-red-500 text-sm'>{formState.errors.lastName.message}</p>
-              }
-            </div>
-
-            <div>
-              <Label htmlFor='organization'>Media Organization</Label>
+              <Label htmlFor='organization'>Media Organization *</Label>
               <Input
                 id='organization'
                 type='text'
-                {...register('organization', { required: "Organization is required" })}
+                {...register('organization', { 
+                  required: "Organization is required for journalist accounts" 
+                })}
                 placeholder="e.g., CNN, BBC, New York Times"
               />
               {formState.errors.organization && 
-                <p className='text-red-500 text-sm'>{formState.errors.organization.message}</p>
+                <p className='text-red-500 text-sm mt-1'>{formState.errors.organization.message}</p>
               }
             </div>
 
             <div>
-              <Label htmlFor='email'>Email</Label>
+              <Label htmlFor='email'>Email *</Label>
               <Input
                 id='email'
                 type='email'
-                {...register('email', { required: "Email is required" })}
+                {...register('email', { 
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    message: "Invalid email format"
+                  }
+                })}
               />
               {formState.errors.email && 
-                <p className='text-red-500 text-sm'>{formState.errors.email.message}</p>
+                <p className='text-red-500 text-sm mt-1'>{formState.errors.email.message}</p>
               }
             </div>
 
             <div>
-              <Label htmlFor='phone'>Phone</Label>
+              <Label htmlFor='phone'>Phone *</Label>
               <Input
                 id='phone'
-                type='tel'
-                {...register("phone", { required: "Phone is required" })}
+                type='number'
+                {...register("phone", { 
+                  required: "Phone is required",
+                  minLength: {
+                    value: 10,
+                    message: "Phone number should be 10 digits"
+                  },
+                  maxLength: {
+                    value: 10,
+                    message: "Phone number should be 10 digits"
+                  }
+                })}
               />
               {formState.errors.phone &&
-                <p className='text-red-500 text-sm'>{formState.errors.phone.message}</p>
+                <p className='text-red-500 text-sm mt-1'>{formState.errors.phone.message}</p>
               }
             </div>
 
             <div>
-              <Label htmlFor='password'>Password</Label>
+              <Label htmlFor='password'>Password *</Label>
               <Input 
                 id='password'
                 type='password'
                 {...register("password", { 
                   required: "Password is required",
-                  minLength: { value: 6, message: "Minimum 6 characters" }
+                  minLength: { 
+                    value: 8, 
+                    message: "Password should contain at least 8 characters" 
+                  }
                 })}
               />
               {formState.errors.password &&
-                <p className='text-red-500 text-sm'>{formState.errors.password.message}</p>
+                <p className='text-red-500 text-sm mt-1'>{formState.errors.password.message}</p>
               }
             </div>
 
+            <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+              <p className="text-yellow-800 text-sm text-center">
+                ⚠️ Your journalist account will require admin approval before you can access enhanced features.
+                You will be notified via email once approved.
+              </p>
+            </div>
+            
             <Button 
-              className='w-full bg-blue-600' 
+              className='w-full bg-blue-600 hover:bg-blue-700' 
               type='submit'
               disabled={loading}
             >
-              {loading ? 'Creating Account...' : 'Create Journalist Account'}
+              {loading ? 'Submitting Application...' : 'Apply for Journalist Access'}
             </Button>
 
             {showBackButton && (
-              <div className="text-center">
-                <Link className='text-sm text-blue-600 hover:underline' href={'/registration'}>
-                  Register as regular user instead
+              <div className="text-center pt-4 border-t">
+                <Link 
+                  className='text-sm text-blue-600 hover:underline' 
+                  href={'/registration'}
+                >
+                  ← Back to regular registration
                 </Link>
               </div>
             )}

@@ -1,7 +1,7 @@
 // lib/seed-admin.ts
 import { hash } from "bcrypt";
 import { connectMongoDB } from "./mongodb";
-import User from "../models/users";
+import User from "../../models/users";
 
 interface SeedResult {
     success: boolean;

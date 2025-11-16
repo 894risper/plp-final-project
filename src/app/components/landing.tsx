@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, FileText, Users, DollarSign, Shield, LogOut, Plus, Settings } from 'lucide-react';
+import { AlertTriangle, FileText, Users, DollarSign, Shield, LogOut, Plus, Settings, CheckCircle } from 'lucide-react';
 import { toast } from "sonner"
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from 'next/navigation';
@@ -14,6 +14,7 @@ import { WhistleblowerPortal } from './WhistleblowerPortal';
 import { DataVisualization } from './DataVisualization';
 import { AnomalyDashboard } from './AnomalyDashboard';
 import { ContractForm } from '../components/ContractForm';
+import { UserVerification } from '../components/UserVerification';
 
 interface Stats {
   totalContracts: number;
@@ -53,6 +54,14 @@ export default function Landing() {
   });
   const [loading, setLoading] = useState(true);
   const [showContractForm, setShowContractForm] = useState(false);
+
+  // DEBUG: Add console logs to see what's happening
+  useEffect(() => {
+    console.log('🔍 DEBUG - Session:', session);
+    console.log('🔍 DEBUG - User Role:', userRole);
+    console.log('🔍 DEBUG - Is Admin:', isAdmin);
+    console.log('🔍 DEBUG - Is Journalist:', isJournalist);
+  }, [session, userRole, isAdmin, isJournalist]);
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -134,6 +143,7 @@ export default function Landing() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
+              {/* DEBUG: Show role info */}
               <Badge variant="outline" className="capitalize">
                 {user.role || 'public'}
               </Badge>
@@ -160,13 +170,31 @@ export default function Landing() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Contract Form Modal for Admin */}
+        {/* DEBUG: Show access info */}
+        <Card className="mb-8 bg-blue-50 border-blue-200">
+          <CardContent className="p-4">
+            <div className="flex items-start space-x-3">
+              <Settings className="h-5 w-5 text-blue-600 mt-0.5" />
+              <div>
+                <h3 className="font-semibold text-blue-900 mb-2">Debug Info</h3>
+                <div className="text-sm text-blue-800 space-y-1">
+                  <p>• <strong>User Role:</strong> {user.role}</p>
+                  <p>• <strong>Is Admin:</strong> {isAdmin ? 'YES' : 'NO'}</p>
+                  <p>• <strong>Is Journalist:</strong> {isJournalist ? 'YES' : 'NO'}</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Rest of your landing page code remains the same */}
+        {/* Contract Form Modal */}
         {showContractForm && isAdmin && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <ContractForm onSuccess={() => {
                 setShowContractForm(false);
-                loadStats(); // Refresh stats after adding contract
+                loadStats();
               }} />
               <div className="p-4 border-t">
                 <Button 
@@ -200,54 +228,12 @@ export default function Landing() {
 
         {/* Overview Stats */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Contracts</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalContracts.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">Monitored contracts</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Value</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{formatCurrency(stats.totalValue)}</div>
-              <p className="text-xs text-muted-foreground">Contract value tracked</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Flagged Contracts</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-red-500" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">{stats.flaggedContracts}</div>
-              <p className="text-xs text-muted-foreground">Potential anomalies</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Vendors</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.activeVendors}</div>
-              <p className="text-xs text-muted-foreground">Registered vendors</p>
-            </CardContent>
-          </Card>
+          {/* Your stats cards */}
         </div>
 
         {/* Main Tabs */}
         <Tabs defaultValue="contracts" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="contracts">Contracts</TabsTrigger>
             <TabsTrigger value="anomalies">Anomalies</TabsTrigger>
             <TabsTrigger value="vendors">Vendors</TabsTrigger>
@@ -256,34 +242,17 @@ export default function Landing() {
               <Shield className="h-4 w-4 mr-2" />
               Report
             </TabsTrigger>
+            {/* DEBUG: This should show for admin */}
+            {isAdmin && (
+              <TabsTrigger value="verification">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Verify Users
+              </TabsTrigger>
+            )}
           </TabsList>
 
           <TabsContent value="contracts">
-            <Card>
-              <CardHeader>
-                <CardTitle>Contracts</CardTitle>
-                <CardDescription>
-                  View and manage all government contracts
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {isAdmin ? (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Contract Management</h3>
-                    <p className="text-gray-600 mb-4">
-                      Use the "Add Contract" button above to enter new contract data.
-                    </p>
-                    <Button onClick={() => setShowContractForm(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add New Contract
-                    </Button>
-                  </div>
-                ) : (
-                  <p>Contract viewing features coming soon...</p>
-                )}
-              </CardContent>
-            </Card>
+            {/* Contracts content */}
           </TabsContent>
 
           <TabsContent value="vendors">
@@ -301,6 +270,13 @@ export default function Landing() {
           <TabsContent value="anomalies">
             <AnomalyDashboard userRole={user.role as 'public' | 'journalist' | 'admin'} />
           </TabsContent>
+
+          {/* DEBUG: This should show for admin */}
+          {isAdmin && (
+            <TabsContent value="verification">
+              <UserVerification />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
     </div>
