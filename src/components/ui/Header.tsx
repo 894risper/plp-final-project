@@ -1,5 +1,6 @@
 import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const Header = () => {
     return (
@@ -24,8 +25,8 @@ const Header = () => {
                     </nav>
 
                     <div className="flex items-center gap-4">
-                        <Button variant="ghost">Sign In</Button>
-                        <Button>Get Started</Button>
+                        <Button asChild variant="ghost"><Link href="/login">Sign In</Link></Button>
+                        <Button asChild><Link href="/registration">Get Started</Link></Button>
                     </div>
                 </div>
             </div>

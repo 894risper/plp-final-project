@@ -1,7 +1,7 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcrypt";
-import { connectMongoDB} from "../../../../../lib/mongodb"
+import { connectMongoDB} from "../../../../lib/mongodb"
 import User from "../../../../../models/users";
 
 export const authOptions: NextAuthOptions = {
@@ -18,7 +18,14 @@ export const authOptions: NextAuthOptions = {
                     return null;
                 }
 
-                await connectMongoDB();
+                try {
+                    await connectMongoDB();
+                } catch (err) {
+                    console.error("[Auth] Failed to connect to MongoDB during authorize:", err);
+                    // Fail authentication gracefully instead of throwing and crashing the route
+                    return null;
+                }
+
                 const user = await User.findOne({ email: credentials.email });
 
                 if (!user) {

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { connectMongoDB } from "../../../../lib/mongodb";
+import { connectMongoDB } from "../../../lib/mongodb";
 import User, { IUser } from "../../../../models/users";
 
 interface LoginBody {

@@ -9,9 +9,15 @@ import { Button } from '@/components/ui/button';
 import { useForm } from "react-hook-form"
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+<<<<<<< HEAD
 import { toast } from "sonner"
 import JournalistRegistration from './JournalistRegistration';
 import { apiFetch } from '@/lib/api';
+=======
+import { signIn } from 'next-auth/react'
+import { toast } from "sonner"
+import JournalistRegistration from '../components/JournalistRegistration';
+>>>>>>> tracker
 
 type Inputs = {
   firstName: string;
@@ -30,6 +36,7 @@ const Register = () => {
   const handleFormSubmit = async (data: Inputs) => {
     setLoading(true);
     try {
+<<<<<<< HEAD
       const res = await apiFetch('/auth/register', {
         method: 'POST',
         body: JSON.stringify({
@@ -44,14 +51,58 @@ const Register = () => {
       if (res?.token) {
         localStorage.setItem('corruption-tracker-token', res.token);
         localStorage.setItem('corruption-tracker-user', JSON.stringify(res.user));
+=======
+      const res = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...data,
+          role: 'public' // Explicitly set role
+        })
+      });
+      
+      // Safely parse response: prefer JSON, but handle unexpected HTML/text error pages
+      let result: any = null;
+      let rawText: string | null = null;
+      try {
+        const contentType = res.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          result = await res.json();
+        } else {
+          rawText = await res.text();
+        }
+      } catch (parseErr) {
+        // Ignore parse errors; we'll handle based on status
+>>>>>>> tracker
       }
-      toast.success("Registration successful!");
-      reset();
-      router.push('/login');
 
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Registration failed. Please try again.";
-      toast.error(errorMessage);
+      if (!res.ok) {
+        const message = result?.error || result?.message || rawText || `Failed to register user (status ${res.status})`;
+        throw new Error(message);
+      }
+
+      const successMessage = result?.message || rawText || "Registration successful!";
+      toast.success(successMessage);
+      reset();
+
+      // Automatically sign the user in and go to landing
+      const signInResult = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false
+      });
+
+      if (signInResult?.ok) {
+        router.push('/landing');
+      } else {
+        toast.message("Account created. Please log in.");
+        router.push('/login');
+      }
+
+    } catch (error: any) {
+      toast.error(error.message || "Registration failed. Please try again.");
       console.error("Registration error:", error);
     } finally {
       setLoading(false);
@@ -62,7 +113,10 @@ const Register = () => {
   if (showJournalistForm) {
     return (
       <JournalistRegistration 
-        onSuccess={() => setShowJournalistForm(false)}
+        onSuccess={() => {
+          setShowJournalistForm(false);
+          router.push('/login');
+        }}
         showBackButton={true}
       />
     );
@@ -73,7 +127,7 @@ const Register = () => {
       <Card className='w-full max-w-md'>
         <CardHeader className='text-center'>
           <div className='flex justify-center mb-4'>
-            <Shield className="h-12 w-12 text-blue-900 "></Shield>
+            <Shield className="h-12 w-12 text-blue-900" />
           </div>
           <CardTitle className='text-2xl'>Corruption Tracker</CardTitle>
           <CardDescription>
@@ -81,7 +135,7 @@ const Register = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(handleFormSubmit)}>
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
             <div>
               <Label htmlFor='firstName'>First Name</Label>
               <Input
@@ -96,107 +150,107 @@ const Register = () => {
                 })}
               />
               {formState.errors.firstName &&
-                <p className='text-red-500'>
+                <p className='text-red-500 text-sm mt-1'>
                   {formState.errors.firstName.message}
                 </p>
               }
             </div>
+            
             <div>
-              <Label htmlFor='lastName'>Last Name
-                <Input
-                  id='lastName'
-                  type='text'
-                  {...register('lastName', {
-                    required: "The last name is required",
-                    pattern: {
-                      value: /^[a-zA-Z]+$/,
-                      message: "Username should only contain letters"
-                    }
-                  })}
-                />
-                {formState.errors.lastName &&
-                  <p className='text-red-500'>
-                    {formState.errors.lastName.message}
-                  </p>
-                }
-              </Label>
+              <Label htmlFor='lastName'>Last Name</Label>
+              <Input
+                id='lastName'
+                type='text'
+                {...register('lastName', {
+                  required: "The last name is required",
+                  pattern: {
+                    value: /^[a-zA-Z]+$/,
+                    message: "Last name should only contain letters"
+                  }
+                })}
+              />
+              {formState.errors.lastName &&
+                <p className='text-red-500 text-sm mt-1'>
+                  {formState.errors.lastName.message}
+                </p>
+              }
             </div>
+            
             <div>
-              <Label htmlFor='phone'>Phone
-                <Input
-                  id='phone'
-                  type='number'
-                  {...register("phone", {
-                    required: "Phone number is required",
-                    pattern: {
-                      value: /^[0-9]/,
-                      message: "Phone number should only contain numbers"
-                    },
-                    minLength: {
-                      value: 10,
-                      message: "Phone number should not contain less than 10 numbers"
-                    },
-                    maxLength: {
-                      value: 10,
-                      message: "Phone number should not contain more than 10 numbers"
-                    }
-                  })}
-                />
-                {formState.errors.phone &&
-                  <p className='text-red-500'>
-                    {formState.errors.phone.message}
-                  </p>
-                }
-              </Label>
+              <Label htmlFor='phone'>Phone</Label>
+              <Input
+                id='phone'
+                type='number'
+                {...register("phone", {
+                  required: "Phone number is required",
+                  pattern: {
+                    value: /^[0-9]/,
+                    message: "Phone number should only contain numbers"
+                  },
+                  minLength: {
+                    value: 10,
+                    message: "Phone number should be 10 digits"
+                  },
+                  maxLength: {
+                    value: 10,
+                    message: "Phone number should be 10 digits"
+                  }
+                })}
+              />
+              {formState.errors.phone &&
+                <p className='text-red-500 text-sm mt-1'>
+                  {formState.errors.phone.message}
+                </p>
+              }
             </div>
+            
             <div>
-              <Label htmlFor='email'>Email
-                <Input
-                  id='email'
-                  type='email'
-                  {...register('email', {
-                    required: "The email is required",
-                    pattern: {
-                      value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-                      message: "Invalid email format"
-                    }
-                  })}
-                />
-                {formState.errors.email &&
-                  <p className='text-red-500'>
-                    {formState.errors.email.message}
-                  </p>
-                }
-              </Label>
+              <Label htmlFor='email'>Email</Label>
+              <Input
+                id='email'
+                type='email'
+                {...register('email', {
+                  required: "The email is required",
+                  pattern: {
+                    value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+                    message: "Invalid email format"
+                  }
+                })}
+              />
+              {formState.errors.email &&
+                <p className='text-red-500 text-sm mt-1'>
+                  {formState.errors.email.message}
+                </p>
+              }
             </div>
+            
             <div>
-              <Label htmlFor='password'>Password
-                <Input
-                  id='password'
-                  type='password'
-                  {...register("password", {
-                    required: "The password is required",
-                    minLength: {
-                      value: 8,
-                      message: "Password should contain at least 8 characters"
-                    }
-                  })}
-                />
-                {formState.errors.password &&
-                  <p className='text-red-500'>
-                    {formState.errors.password.message}
-                  </p>
-                }
-              </Label>
+              <Label htmlFor='password'>Password</Label>
+              <Input
+                id='password'
+                type='password'
+                {...register("password", {
+                  required: "The password is required",
+                  minLength: {
+                    value: 8,
+                    message: "Password should contain at least 8 characters"
+                  }
+                })}
+              />
+              {formState.errors.password &&
+                <p className='text-red-500 text-sm mt-1'>
+                  {formState.errors.password.message}
+                </p>
+              }
             </div>
-            <div className='flex justify-center '>
-              <Button className='bg-blue-900 mt-5 flex w-full '
-                type='submit'
-                disabled={loading}
-              >
-                {loading ? 'Registering...' : 'Register'}
-              </Button>
-            </div>
+            
+            <Button 
+              className='bg-blue-900 w-full mt-5'
+              type='submit'
+              disabled={loading}
+            >
+              {loading ? 'Registering...' : 'Register as Public User'}
+            </Button>
 
             {/* Journalist Registration Option */}
             <div className="mt-6 p-4 bg-blue-50 rounded-lg text-center">

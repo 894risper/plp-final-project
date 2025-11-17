@@ -24,6 +24,7 @@ const Login = () => {
   
   const handleFormSubmit = async (data: Inputs) => {
     try {
+<<<<<<< HEAD
       const res = await apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email: data.email, password: data.password })
@@ -36,6 +37,25 @@ const Login = () => {
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed';
       toast.error(message);
+=======
+      const result = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false
+      }); 
+
+      if (result?.ok) {
+        toast.success("Login successful!");
+        reset();
+        router.push("/landing");
+      } else {
+        toast.error(result?.error || "Login failed");
+      }
+
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error?.message || "An unexpected error occurred");
+>>>>>>> tracker
     }
   }
   
@@ -96,8 +116,9 @@ const Login = () => {
             <Button  
               className='bg-blue-900 w-full mt-5'
               type='submit'
+              disabled={formState.isSubmitting}
             >
-              Login
+              {formState.isSubmitting ? 'Logging in...' : 'Login'}
             </Button>
             
             <Link className='text-sm mt-3 text-right block' href={'/registration'}>

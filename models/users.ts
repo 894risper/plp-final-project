@@ -1,4 +1,3 @@
-// models/users.ts
 import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
 export interface IUser extends Document {
@@ -9,8 +8,11 @@ export interface IUser extends Document {
     email: string;
     password: string;
     role: 'public' | 'journalist' | 'admin';
-    status: 'pending' | 'active' | 'suspended';
+    status: 'pending' | 'active' | 'suspended' | 'rejected';
     organization?: string;
+    verificationNotes?: string;
+    verifiedBy?: Types.ObjectId;
+    verifiedAt?: Date;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -28,12 +30,23 @@ const userSchema = new Schema<IUser>({
     },
     status: { 
         type: String, 
-        enum: ['pending', 'active', 'suspended'],
+        enum: ['pending', 'active', 'suspended', 'rejected'],
         default: 'active' 
     },
-    organization: { type: String } // Simple field for journalist's organization
+    organization: { type: String },
+    verificationNotes: { type: String },
+    verifiedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    verifiedAt: { type: Date }
 }, { 
     timestamps: true 
+});
+
+
+userSchema.pre('save', function(next) {
+    if (this.role === 'journalist' && this.isNew) {
+        this.status = 'pending';
+    }
+    next();
 });
 
 const User: Model<IUser> = mongoose.models.User as Model<IUser> || mongoose.model<IUser>("User", userSchema);
