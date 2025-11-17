@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import User, { IUser } from '../models/User.js';
+import User, { IUser } from '../models/User';
 
 const router = Router();
 
 function signToken(user: IUser) {
-  const payload = { id: user._id.toString(), email: user.email, role: user.role };
+  const payload = { id: (user as any)._id?.toString?.() || String((user as any)._id), email: user.email, role: user.role };
   const secret = process.env.JWT_SECRET || 'dev_secret';
   return jwt.sign(payload, secret, { expiresIn: '7d' });
 }

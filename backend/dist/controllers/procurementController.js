@@ -1,4 +1,4 @@
-import Procurement from "../models/procurement.js";
+import Procurement from "../models/procurement";
 export const createProcurement = async (req, res) => {
     try {
         const procurement = new Procurement(req.body);

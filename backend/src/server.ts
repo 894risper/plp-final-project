@@ -28,12 +28,12 @@ app.use(helmet());
 app.use(compression());
 
 // Models
-import './models/User.js';
-import './models/Stat.js';
+import './models/User';
+import './models/Stat';
 
 // Routes
-import authRouter from './routes/auth.js';
-import statsRouter from './routes/stats.js';
+import authRouter from './routes/auth';
+import statsRouter from './routes/stats';
 
 app.use('/api/auth', authRouter);
 app.use('/api', statsRouter);
