@@ -42,7 +42,17 @@ export function AnomalyDashboard({ userRole }: AnomalyDashboardProps) {
       const response = await fetch('/api/anomalies');
       if (response.ok) {
         const anomaliesData = await response.json();
-        setAnomalies(anomaliesData);
+        // Coerce various API response shapes into an array of anomalies
+        const normalized = Array.isArray(anomaliesData)
+          ? anomaliesData
+          : Array.isArray(anomaliesData?.anomalies)
+            ? anomaliesData.anomalies
+            : Array.isArray(anomaliesData?.data)
+              ? anomaliesData.data
+              : Array.isArray(anomaliesData?.items)
+                ? anomaliesData.items
+                : [];
+        setAnomalies(normalized as Anomaly[]);
       } else {
         console.error('Failed to load anomalies');
       }

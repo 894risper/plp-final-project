@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useForm } from "react-hook-form"
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { signIn } from 'next-auth/react'
 import { toast } from "sonner"
 import JournalistRegistration from '../components/JournalistRegistration';
 
@@ -40,15 +41,42 @@ const Register = () => {
         })
       });
       
-      const result = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(result.error || "Failed to register user");
+      // Safely parse response: prefer JSON, but handle unexpected HTML/text error pages
+      let result: any = null;
+      let rawText: string | null = null;
+      try {
+        const contentType = res.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          result = await res.json();
+        } else {
+          rawText = await res.text();
+        }
+      } catch (parseErr) {
+        // Ignore parse errors; we'll handle based on status
       }
-      
-      toast.success(result.message || "Registration successful!");
+
+      if (!res.ok) {
+        const message = result?.error || result?.message || rawText || `Failed to register user (status ${res.status})`;
+        throw new Error(message);
+      }
+
+      const successMessage = result?.message || rawText || "Registration successful!";
+      toast.success(successMessage);
       reset();
-      router.push('/login');
+
+      // Automatically sign the user in and go to landing
+      const signInResult = await signIn('credentials', {
+        email: data.email,
+        password: data.password,
+        redirect: false
+      });
+
+      if (signInResult?.ok) {
+        router.push('/landing');
+      } else {
+        toast.message("Account created. Please log in.");
+        router.push('/login');
+      }
 
     } catch (error: any) {
       toast.error(error.message || "Registration failed. Please try again.");
