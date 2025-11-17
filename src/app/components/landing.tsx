@@ -92,6 +92,21 @@ export default function Landing() {
     }
   };
 
+  const loadContracts = async () => {
+    try {
+      const response = await fetch('/api/contracts');
+      if (response.ok) {
+        const data = await response.json();
+        setContracts(Array.isArray(data) ? data : []);
+      } else {
+        toast.error('Failed to load contracts');
+      }
+    } catch (error) {
+      console.error('Error loading contracts:', error);
+      toast.error('Failed to load contracts');
+    }
+  };
+
   const handleSignOut = async () => {
     try {
       await signOut({ redirect: false });
