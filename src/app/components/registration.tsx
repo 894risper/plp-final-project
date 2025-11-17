@@ -9,15 +9,10 @@ import { Button } from '@/components/ui/button';
 import { useForm } from "react-hook-form"
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-<<<<<<< HEAD
-import { toast } from "sonner"
 import JournalistRegistration from './JournalistRegistration';
 import { apiFetch } from '@/lib/api';
-=======
 import { signIn } from 'next-auth/react'
 import { toast } from "sonner"
-import JournalistRegistration from '../components/JournalistRegistration';
->>>>>>> tracker
 
 type Inputs = {
   firstName: string;
@@ -36,34 +31,13 @@ const Register = () => {
   const handleFormSubmit = async (data: Inputs) => {
     setLoading(true);
     try {
-<<<<<<< HEAD
-      const res = await apiFetch('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          role: 'public',
-          firstName: data.firstName,
-          lastName: data.lastName,
-          phone: data.phone
-        })
-      });
-      if (res?.token) {
-        localStorage.setItem('corruption-tracker-token', res.token);
-        localStorage.setItem('corruption-tracker-user', JSON.stringify(res.user));
-=======
       const res = await fetch("/api/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...data,
-          role: 'public' // Explicitly set role
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, role: 'public' })
       });
-      
-      // Safely parse response: prefer JSON, but handle unexpected HTML/text error pages
+
+      // Try to parse JSON but handle text fallback
       let result: any = null;
       let rawText: string | null = null;
       try {
@@ -73,9 +47,8 @@ const Register = () => {
         } else {
           rawText = await res.text();
         }
-      } catch (parseErr) {
-        // Ignore parse errors; we'll handle based on status
->>>>>>> tracker
+      } catch (_) {
+        // ignore
       }
 
       if (!res.ok) {
@@ -87,7 +60,7 @@ const Register = () => {
       toast.success(successMessage);
       reset();
 
-      // Automatically sign the user in and go to landing
+      // Attempt auto sign-in
       const signInResult = await signIn('credentials', {
         email: data.email,
         password: data.password,
@@ -100,9 +73,8 @@ const Register = () => {
         toast.message("Account created. Please log in.");
         router.push('/login');
       }
-
     } catch (error: any) {
-      toast.error(error.message || "Registration failed. Please try again.");
+      toast.error(error?.message || "Registration failed. Please try again.");
       console.error("Registration error:", error);
     } finally {
       setLoading(false);

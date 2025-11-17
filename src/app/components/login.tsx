@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from "sonner" 
 import { apiFetch } from '@/lib/api';
+import {signIn} from "next-auth/react";
 
 
 type Inputs = {
@@ -24,7 +25,6 @@ const Login = () => {
   
   const handleFormSubmit = async (data: Inputs) => {
     try {
-<<<<<<< HEAD
       const res = await apiFetch('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email: data.email, password: data.password })
@@ -35,27 +35,27 @@ const Login = () => {
       reset();
       router.push("/landing");
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Login failed';
-      toast.error(message);
-=======
-      const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false
-      }); 
+      // Fallback to NextAuth credentials sign-in if API login fails
+      try {
+        const result = await signIn('credentials', {
+          email: data.email,
+          password: data.password,
+          redirect: false
+        });
 
-      if (result?.ok) {
-        toast.success("Login successful!");
-        reset();
-        router.push("/landing");
-      } else {
-        toast.error(result?.error || "Login failed");
+        if (result?.ok) {
+          toast.success("Login successful!");
+          reset();
+          router.push("/landing");
+        } else {
+          const message = result?.error || (error instanceof Error ? error.message : 'Login failed');
+          toast.error(message);
+        }
+      } catch (fallbackError) {
+        console.error("Login error:", fallbackError);
+        const message = fallbackError instanceof Error ? fallbackError.message : 'An unexpected error occurred';
+        toast.error(message);
       }
-
-    } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(error?.message || "An unexpected error occurred");
->>>>>>> tracker
     }
   }
   

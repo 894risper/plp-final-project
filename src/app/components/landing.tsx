@@ -54,80 +54,24 @@ export default function Landing() {
   });
   const [loading, setLoading] = useState(true);
   const [showContractForm, setShowContractForm] = useState(false);
+  const [contracts, setContracts] = useState<any[]>([]);
 
-<<<<<<< HEAD
-    useEffect(() => {
-        // Check for existing user session in localStorage
-        const savedUser = localStorage.getItem('corruption-tracker-user');
-        if (savedUser) {
-            setUser(JSON.parse(savedUser));
-        }
-        // Fetch stats from backend
-        const fetchStats = async () => {
-            try {
-                const res = await fetch((process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:4000/api') + '/stats');
-                if (res.ok) {
-                    const data = await res.json();
-                    setStats({
-                        totalContracts: data.totalContracts,
-                        totalValue: data.totalValue,
-                        flaggedContracts: data.flaggedContracts,
-                        activeVendors: data.activeVendors
-                    });
-                }
-            } catch (e) {
-                console.warn('Failed to load stats from backend, using defaults');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchStats();
-    }, []);
-
-    const handleSignOut = () => {
-        setUser(null);
-        localStorage.removeItem('corruption-tracker-user');
-        localStorage.removeItem('corruption-tracker-token');
-        toast.success('Signed out successfully');
-    };
-
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-        }).format(amount);
-    };
-
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading Corruption Tracker...</p>
-                </div>
-            </div>
-        );
-=======
-  // DEBUG: Add console logs to see what's happening
+  // Optional debug logs
   useEffect(() => {
-    console.log('🔍 DEBUG - Session:', session);
-    console.log('🔍 DEBUG - User Role:', userRole);
-    console.log('🔍 DEBUG - Is Admin:', isAdmin);
-    console.log('🔍 DEBUG - Is Journalist:', isJournalist);
+    console.log('Session:', session);
+    console.log('User Role:', userRole);
+    console.log('Is Admin:', isAdmin);
+    console.log('Is Journalist:', isJournalist);
   }, [session, userRole, isAdmin, isJournalist]);
 
   useEffect(() => {
     if (status === 'loading') return;
-    
     if (!session) {
       router.push('/login');
       return;
->>>>>>> tracker
     }
-    
     loadStats();
+    loadContracts();
   }, [session, status, router]);
 
   const loadStats = async () => {

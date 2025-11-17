@@ -3,12 +3,23 @@ import { connectMongoDB } from '../../../lib/mongodb';
 import Contract from '../../../../models/Contract';
 import Vendor from '../../../../models/vendor';
 import { getServerSession } from 'next-auth';
+import { authOptions } from '../auth/[...nextauth]/route';
+
+export async function GET() {
+  try {
+    await connectMongoDB();
+    const contracts = await Contract.find().sort({ createdAt: -1 }).lean();
+    return NextResponse.json(contracts);
+  } catch (error) {
+    console.error('Error fetching contracts:', error);
+    return NextResponse.json({ error: 'Failed to fetch contracts' }, { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession();
+    const session = await getServerSession(authOptions);
     
-    // Check if user is admin
     if (session?.user?.role !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized - Admin access required' },
@@ -16,12 +27,11 @@ export async function POST(request: Request) {
       );
     }
 
-    connectMongoDB();
+    await connectMongoDB();
     
     const body = await request.json();
     const { contract_id, title, vendor_name, ministry, value, date_awarded, category, description, anomaly_flags } = body;
 
-    // Check if contract already exists
     const existingContract = await Contract.findOne({ contract_id });
     if (existingContract) {
       return NextResponse.json(
@@ -30,7 +40,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Find or create vendor
     let vendor = await Vendor.findOne({ name: vendor_name });
     if (!vendor) {
       vendor = new Vendor({
@@ -50,7 +59,6 @@ export async function POST(request: Request) {
       await vendor.save();
     }
 
-    // Create contract
     const newContract = new Contract({
       contract_id,
       title,
@@ -62,7 +70,7 @@ export async function POST(request: Request) {
       description,
       anomaly_flags: anomaly_flags || [],
       risk_level: anomaly_flags?.length > 0 ? 'high' : 'low',
-      createdBy: session.user.id
+      createdBy: (session.user as any).id
     });
 
     await newContract.save();
