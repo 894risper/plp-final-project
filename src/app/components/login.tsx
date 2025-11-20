@@ -135,7 +135,7 @@ const Login = () => {
             </Button>
             
             <Link className='text-sm mt-3 text-right block' href={'/registration'}>
-              Don't have an account? <span className='underline'>Register</span>
+              Don&apos;t have an account? <span className='underline'>Register</span>
             </Link>
           </form>
         </CardContent>

@@ -113,7 +113,7 @@ export async function POST(request: Request) {
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error('Registration error:', error);
+    console.error('Registration error (full object):', JSON.stringify(error, Object.getOwnPropertyNames(error)));
 
     // Handle Mongoose validation and duplicate key errors
     if (error && typeof error === 'object') {
@@ -132,7 +132,7 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', details: error.message },
       { status: 500 }
     );
   }

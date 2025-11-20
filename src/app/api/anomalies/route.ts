@@ -12,21 +12,23 @@ export async function GET(request: Request) {
 
     
     const now = new Date();
-    let startDate = new Date();
-    
+    let targetMonth = now.getMonth(); 
+    const targetYear = now.getFullYear();
+
     switch (timeframe) {
       case '3months':
-        startDate.setMonth(now.getMonth() - 3);
+        targetMonth -= 3;
         break;
       case '6months':
-        startDate.setMonth(now.getMonth() - 6);
+        targetMonth -= 6;
         break;
       case '24months':
-        startDate.setMonth(now.getMonth() - 24);
+        targetMonth -= 24;
         break;
       default: // 12 months
-        startDate.setMonth(now.getMonth() - 12);
+        targetMonth -= 12;
     }
+    const startDate = new Date(targetYear, targetMonth, now.getDate());
 
     
     const spendingByMinistry = [
