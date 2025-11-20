@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from "sonner" 
 import { apiFetch } from '@/lib/api';
-import {signIn} from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 
 
 type Inputs = {
@@ -33,7 +33,13 @@ const Login = () => {
       localStorage.setItem('corruption-tracker-user', JSON.stringify(res.user));
       toast.success("Login successful!");
       reset();
-      router.push("/landing");
+      if (res.user.role === 'admin') {
+        router.push('/admin/dashboard');
+      } else if (res.user.role === 'journalist') {
+        router.push('/journalist/dashboard');
+      } else {
+        router.push('/landing');
+      }
     } catch (error) {
       // Fallback to NextAuth credentials sign-in if API login fails
       try {
@@ -46,7 +52,14 @@ const Login = () => {
         if (result?.ok) {
           toast.success("Login successful!");
           reset();
-          router.push("/landing");
+          const session = await getSession();
+          if (session?.user?.role === 'admin') {
+            router.push('/admin/dashboard');
+          } else if (session?.user?.role === 'journalist') {
+            router.push('/journalist/dashboard');
+          } else {
+            router.push('/landing');
+          }
         } else {
           const message = result?.error || (error instanceof Error ? error.message : 'Login failed');
           toast.error(message);

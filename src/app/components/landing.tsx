@@ -267,7 +267,48 @@ export default function Landing() {
           </TabsList>
 
           <TabsContent value="contracts">
-            {/* Contracts content */}
+            <Card>
+              <CardHeader>
+                <CardTitle>All Contracts</CardTitle>
+                <CardDescription>Browse through all government procurement contracts.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {contracts.length > 0 ? (
+                  <div className="space-y-4">
+                    {contracts.map((contract) => (
+                      <Card key={contract._id}>
+                        <CardHeader>
+                          <CardTitle className="text-lg">{contract.title}</CardTitle>
+                          <CardDescription>Ministry of {contract.ministry}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="grid gap-2">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-600">Value:</span>
+                            <span className="text-lg font-semibold text-gray-900">{formatCurrency(contract.value)}</span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-600">Status:</span>
+                            <Badge className="capitalize">{contract.status}</Badge>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm font-medium text-gray-600">Date Awarded:</span>
+                            <span className="text-sm text-gray-800">
+                              {new Date(contract.date_awarded).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <FileText className="mx-auto h-12 w-12 text-gray-400" />
+                    <h3 className="mt-2 text-sm font-medium text-gray-900">No contracts found</h3>
+                    <p className="mt-1 text-sm text-gray-500">There are currently no contracts to display.</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="vendors">

@@ -48,10 +48,34 @@ export const authOptions: NextAuthOptions = {
                     name: `${user.firstName} ${user.lastName}`,
                     firstName: user.firstName,
                     lastName: user.lastName,
+                    role: user.role,
+                    status: user.status
                 };
             }
         })
     ],
+    callbacks: {
+        async jwt({ token, user }) {
+            if (user) {
+                token.id = user.id;
+                token.role = user.role;
+                token.status = user.status;
+                token.firstName = user.firstName;
+                token.lastName = user.lastName;
+            }
+            return token;
+        },
+        async session({ session, token }) {
+            if (session.user) {
+                session.user.id = token.id;
+                session.user.role = token.role;
+                session.user.status = token.status;
+                session.user.firstName = token.firstName;
+                session.user.lastName = token.lastName;
+            }
+            return session;
+        }
+    },
     session: {
         strategy: "jwt" // Use JWT tokens for sessions
     },
