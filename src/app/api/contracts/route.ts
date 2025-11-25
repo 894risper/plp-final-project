@@ -65,7 +65,6 @@ export async function POST(request: Request) {
       );
     }
 
-    // Find or create vendor
     let vendor = await Vendor.findOne({ name: vendor_name });
     if (!vendor) {
       console.log('🆕 Creating new vendor:', vendor_name);
@@ -86,7 +85,6 @@ export async function POST(request: Request) {
       await vendor.save();
     }
 
-    // Create contract
     const newContract = new Contract({
       contract_id,
       title,

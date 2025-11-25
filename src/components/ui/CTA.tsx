@@ -1,5 +1,6 @@
 import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const CTA = () => {
     return (
@@ -20,15 +21,16 @@ const CTA = () => {
                     </p>
 
                     <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-                        <Button size="lg" variant="secondary" className="text-lg">
-                            Create Account
+                        <Button asChild size="lg" variant="secondary" className="text-lg">
+                            <Link href="/registration">Create Account</Link>
                         </Button>
                         <Button
+                            asChild
                             size="lg"
                             variant="outline"
                             className="border-primary-foreground text-lg text-primary-foreground hover:bg-primary-foreground hover:text-primary"
                         >
-                            Learn More
+                            <Link href="/login">Learn More</Link>
                         </Button>
                     </div>
                 </div>

@@ -103,7 +103,6 @@ export default function Landing() {
       router.push('/login');
       return;
     }
-    
     loadStats();
     loadContracts();
     setLoading(false);

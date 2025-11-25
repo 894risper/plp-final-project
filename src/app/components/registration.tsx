@@ -9,8 +9,10 @@ import { Button } from '@/components/ui/button';
 import { useForm } from "react-hook-form"
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import JournalistRegistration from './JournalistRegistration';
+import { apiFetch } from '@/lib/api';
+import { signIn } from 'next-auth/react'
 import { toast } from "sonner"
-import JournalistRegistration from '../components/JournalistRegistration';
 
 type Inputs = {
   firstName: string;
@@ -31,24 +33,32 @@ const Register = () => {
     try {
       const res = await fetch("/api/register", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...data,
-          role: 'public' // Explicitly set role
-        })
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, role: 'public' })
       });
-      
-      const result = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(result.error || "Failed to register user");
+
+      // Try to parse JSON but handle text fallback
+      let result: any = null;
+      let rawText: string | null = null;
+      try {
+        const contentType = res.headers.get("content-type") || "";
+        if (contentType.includes("application/json")) {
+          result = await res.json();
+        } else {
+          rawText = await res.text();
+        }
+      } catch (_) {
+        // ignore
       }
-      
-      toast.success(result.message || "Registration successful!");
+
+      if (!res.ok) {
+        const message = result?.error || result?.message || rawText || `Failed to register user (status ${res.status})`;
+        throw new Error(message);
+      }
+
+      const successMessage = result?.message || rawText || "Registration successful!";
+      toast.success(successMessage);
       reset();
-      router.push('/login');
 
     } catch (error: unknown) {
       console.error("Registration error:", error);

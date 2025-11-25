@@ -1,5 +1,6 @@
 import { Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const Hero = () => {
     return (
@@ -26,11 +27,11 @@ const Hero = () => {
                     </p>
 
                     <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-                        <Button size="lg" className="text-lg">
-                            Get Started
+                        <Button asChild size="lg" className="text-lg">
+                            <Link href="/registration">Get Started</Link>
                         </Button>
-                        <Button size="lg" variant="outline" className="text-lg">
-                            View Demo
+                        <Button asChild size="lg" variant="outline" className="text-lg">
+                            <Link href="/login">View Demo</Link>
                         </Button>
                     </div>
                 </div>
