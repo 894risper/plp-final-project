@@ -12,7 +12,7 @@ export async function GET() {
       .limit(50)
       .lean();
 
-    // Type-safe mapping using type assertion
+    
     const vendorsData = vendors.map(vendor => ({
       ...vendor,
       _id: (vendor._id as Types.ObjectId).toString(), // Proper type assertion

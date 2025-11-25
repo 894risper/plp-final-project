@@ -7,6 +7,8 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { user } = body;
 
+    console.log('👤 Fetching all users, admin:', user?.email, 'Role:', user?.role);
+
     // Check if user is admin
     if (user?.role !== 'admin') {
       return NextResponse.json(
@@ -23,6 +25,7 @@ export async function POST(request: Request) {
     .select('-password')
     .sort({ createdAt: -1 });
 
+    console.log(`✅ Found ${users.length} total users`);
     return NextResponse.json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
