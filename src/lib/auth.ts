@@ -1,10 +1,11 @@
-import NextAuth from "next-auth"
-import CredentialsProvider from "next-auth/providers/credentials"
-import bcrypt from "bcrypt"
-import User from "../../models/users"
-import { connectMongoDB } from "./mongodb"
+// src/lib/auth.ts
+import NextAuth, { type NextAuthOptions } from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcrypt";
+import User from "../../models/users";
+import { connectMongoDB } from "./mongodb";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -48,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             email: user.email,
             name: `${user.firstName} ${user.lastName}`,
             role: user.role,
-          }
+          };
         } catch (error) {
           console.error("Auth error:", error);
           throw error;
@@ -62,20 +63,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role
-        token.id = user.id
+        token.role = user.role;
+        token.id = user.id;
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role as string
-        session.user.id = token.id as string
+        session.user.role = token.role as string;
+        session.user.id = token.id as string;
       }
-      return session
+      return session;
     },
   },
   pages: {
     signIn: "/login",
   },
-})
+  secret: process.env.NEXTAUTH_SECRET,
+};

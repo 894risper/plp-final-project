@@ -53,6 +53,15 @@ export function ContractForm({ onSuccess }: ContractFormProps) {
     setLoading(true)
 
     try {
+      // Get user data from localStorage
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        toast.error('Please log in again');
+        return;
+      }
+
+      const user = JSON.parse(userData);
+
       const response = await fetch('/api/contracts', {
         method: 'POST',
         headers: {
@@ -61,7 +70,8 @@ export function ContractForm({ onSuccess }: ContractFormProps) {
         body: JSON.stringify({
           ...formData,
           value: parseFloat(formData.value),
-          date_awarded: new Date(formData.date_awarded)
+          date_awarded: new Date(formData.date_awarded),
+          user: user
         }),
       })
 
@@ -80,10 +90,13 @@ export function ContractForm({ onSuccess }: ContractFormProps) {
         })
         onSuccess?.()
       } else {
-        throw new Error('Failed to add contract')
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add contract')
       }
-    } catch (error) {
-      toast.error('Failed to add contract')
+    } catch (error: unknown) {
+      console.error('Contract submission error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to add contract';
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }

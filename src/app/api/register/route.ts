@@ -3,8 +3,16 @@ import { connectMongoDB } from '../../../lib/mongodb';
 import User from '../../../../models/users';
 import bcrypt from "bcrypt"
 
-// Ensure this route runs on the Node.js runtime (required for bcrypt)
-export const runtime = 'nodejs';
+interface UserData {
+  firstName: string;
+  lastName: string;
+  phone: number;
+  email: string;
+  password: string;
+  role: string;
+  organization?: string;
+  status?: string;
+}
 
 export async function POST(request: Request) {
   try {
@@ -81,12 +89,12 @@ export async function POST(request: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(String(password), 12);
 
-    // Build user data
-    const userData: any = {
-      firstName: String(firstName).trim(),
-      lastName: String(lastName).trim(),
-      phone: phoneNum,
-      email: String(email).toLowerCase().trim(),
+    
+    const userData: UserData = {
+      firstName,
+      lastName,
+      phone: parseInt(phone),
+      email,
       password: hashedPassword,
       role: role || 'public',
       organization
@@ -131,6 +139,8 @@ export async function POST(request: Request) {
       }
     }
 
+  } catch (error: unknown) {
+    console.error('Registration error:', error);
     return NextResponse.json(
       { error: 'Internal server error', details: error.message },
       { status: 500 }

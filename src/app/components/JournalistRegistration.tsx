@@ -61,9 +61,10 @@ export default function JournalistRegistration({
         router.push('/login');
       }
       
-    } catch (error: any) {
-      toast.error(error.message || "Registration failed");
+    } catch (error: unknown) {
       console.error("Journalist registration error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Registration failed";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -60,22 +60,10 @@ const Register = () => {
       toast.success(successMessage);
       reset();
 
-      // Attempt auto sign-in
-      const signInResult = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false
-      });
-
-      if (signInResult?.ok) {
-        router.push('/landing');
-      } else {
-        toast.message("Account created. Please log in.");
-        router.push('/login');
-      }
-    } catch (error: any) {
-      toast.error(error?.message || "Registration failed. Please try again.");
+    } catch (error: unknown) {
       console.error("Registration error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Registration failed. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

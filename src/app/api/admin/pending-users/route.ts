@@ -1,29 +1,16 @@
 import { NextResponse } from 'next/server';
 import { connectMongoDB } from '../../../../lib/mongodb';
 import User from '../../../../../models/users';
-import { auth } from '@/lib/auth';
 
-interface ExtendedSession {
-  user?: {
-    id?: string;
-    email?: string;
-    name?: string;
-    role?: string;
-  };
-}
-
-export async function GET() {
+export async function POST(request: Request) {
   try {
-    const session = await auth() as ExtendedSession;
-    
-    if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized - Please log in' },
-        { status: 401 }
-      );
-    }
-    
-    if (session.user.role !== 'admin') {
+    const body = await request.json();
+    const { user } = body;
+
+    console.log('👤 Checking pending users, admin:', user?.email, 'Role:', user?.role);
+
+    // Check if user is admin
+    if (user?.role !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized - Admin access required' },
         { status: 403 }
@@ -32,11 +19,14 @@ export async function GET() {
 
     await connectMongoDB();
 
-    const pendingUsers = await User.find({
-      role: 'journalist',
-      status: 'pending'
-    }).select('-password').sort({ createdAt: -1 });
+    const pendingUsers = await User.find({ 
+      role: 'journalist', 
+      status: 'pending' 
+    })
+    .select('-password')
+    .sort({ createdAt: -1 });
 
+    console.log(`✅ Found ${pendingUsers.length} pending journalists`);
     return NextResponse.json(pendingUsers);
   } catch (error) {
     console.error('Error fetching pending users:', error);

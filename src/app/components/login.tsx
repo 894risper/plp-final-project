@@ -25,20 +25,26 @@ const Login = () => {
   
   const handleFormSubmit = async (data: Inputs) => {
     try {
-      const res = await apiFetch('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email: data.email, password: data.password })
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
       });
-      localStorage.setItem('corruption-tracker-token', res.token);
-      localStorage.setItem('corruption-tracker-user', JSON.stringify(res.user));
-      toast.success("Login successful!");
-      reset();
-      if (res.user.role === 'admin') {
-        router.push('/admin/dashboard');
-      } else if (res.user.role === 'journalist') {
-        router.push('/journalist/dashboard');
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        toast.success("Login successful!");
+        
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify(result.user));
+        
+        reset();
+        router.push("/landing");
       } else {
-        router.push('/landing');
+        toast.error(result.message || "Login failed");
       }
     } catch (error) {
       // Fallback to NextAuth credentials sign-in if API login fails
@@ -49,26 +55,10 @@ const Login = () => {
           redirect: false
         });
 
-        if (result?.ok) {
-          toast.success("Login successful!");
-          reset();
-          const session = await getSession();
-          if (session?.user?.role === 'admin') {
-            router.push('/admin/dashboard');
-          } else if (session?.user?.role === 'journalist') {
-            router.push('/journalist/dashboard');
-          } else {
-            router.push('/landing');
-          }
-        } else {
-          const message = result?.error || (error instanceof Error ? error.message : 'Login failed');
-          toast.error(message);
-        }
-      } catch (fallbackError) {
-        console.error("Login error:", fallbackError);
-        const message = fallbackError instanceof Error ? fallbackError.message : 'An unexpected error occurred';
-        toast.error(message);
-      }
+    } catch (error: unknown) {
+      console.error("Login error:", error);
+      const errorMessage = error instanceof Error ? error.message : "Login failed";
+      toast.error(errorMessage);
     }
   }
   
