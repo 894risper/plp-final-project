@@ -35,64 +35,91 @@ export function UserVerification() {
 
   const loadUsers = async () => {
     try {
-      setLoading(true)
+      setLoading(true);
       
-      // Load pending users
-      const pendingResponse = await fetch('/api/admin/pending-users')
+      // Get user from localStorage
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        toast.error('Please log in again');
+        return;
+      }
+      const user = JSON.parse(userData);
+
+      // Load pending users with user data
+      const pendingResponse = await fetch('/api/admin/pending-users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user })
+      });
+      
       if (pendingResponse.ok) {
-        const pendingData = await pendingResponse.json()
-        setPendingUsers(pendingData)
+        const pendingData = await pendingResponse.json();
+        setPendingUsers(pendingData);
       } else {
-        toast.error('Failed to load pending users')
+        toast.error('Failed to load pending users');
       }
 
-      // Load all users for the complete list
-      const allResponse = await fetch('/api/users')
+      // Load all users
+      const allResponse = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user })
+      });
+      
       if (allResponse.ok) {
-        const allData = await allResponse.json()
-        setAllUsers(allData)
+        const allData = await allResponse.json();
+        setAllUsers(allData);
       }
 
-    } catch (error) {
-      console.error('Error loading users:', error)
-      toast.error('Failed to load users')
+    } catch (err) {
+      console.error('Error loading users:', err);
+      toast.error('Failed to load users');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   const handleVerifyUser = async (status: 'active' | 'rejected' | 'suspended') => {
-    if (!selectedUser) return
+    if (!selectedUser) return;
 
     try {
-      setActionLoading(selectedUser._id)
+      setActionLoading(selectedUser._id);
+      
+      // Get user from localStorage
+      const userData = localStorage.getItem('user');
+      if (!userData) {
+        toast.error('Please log in again');
+        return;
+      }
+      const user = JSON.parse(userData);
+
       const response = await fetch('/api/admin/verify-user', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId: selectedUser._id,
           status,
-          notes: verificationNotes || undefined
+          notes: verificationNotes || undefined,
+          user
         }),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
 
       if (response.ok) {
-        toast.success(result.message || `User ${status} successfully`)
-        setSelectedUser(null)
-        setVerificationNotes('')
-        await loadUsers() // Refresh the lists
+        toast.success(result.message || `User ${status} successfully`);
+        setSelectedUser(null);
+        setVerificationNotes('');
+        await loadUsers();
       } else {
-        throw new Error(result.error || 'Failed to update user status')
+        throw new Error(result.error || 'Failed to update user status');
       }
-    } catch (error: any) {
-      console.error('Error verifying user:', error)
-      toast.error(error.message || 'Failed to update user status')
+    } catch (err: unknown) {
+      console.error('Error verifying user:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update user status';
+      toast.error(errorMessage);
     } finally {
-      setActionLoading(null)
+      setActionLoading(null);
     }
   }
 

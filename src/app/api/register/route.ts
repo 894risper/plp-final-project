@@ -3,6 +3,17 @@ import { connectMongoDB } from '../../../lib/mongodb';
 import User from '../../../../models/users';
 import bcrypt from "bcrypt"
 
+interface UserData {
+  firstName: string;
+  lastName: string;
+  phone: number;
+  email: string;
+  password: string;
+  role: string;
+  organization?: string;
+  status?: string;
+}
+
 export async function POST(request: Request) {
   try {
     await connectMongoDB();
@@ -23,7 +34,7 @@ export async function POST(request: Request) {
     const hashedPassword = await bcrypt.hash(password, 12);
 
     
-    const userData: any = {
+    const userData: UserData = {
       firstName,
       lastName,
       phone: parseInt(phone),
@@ -54,7 +65,7 @@ export async function POST(request: Request) {
       }
     });
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Registration error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },

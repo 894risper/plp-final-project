@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { useForm } from "react-hook-form"
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { signIn } from "next-auth/react"
 import { toast } from "sonner" 
 
 type Inputs = {
@@ -23,23 +22,32 @@ const Login = () => {
   
   const handleFormSubmit = async (data: Inputs) => {
     try {
-      const result = await signIn('credentials', {
-        email: data.email,
-        password: data.password,
-        redirect: false
-      }); 
-
-      if (result?.ok) {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data)
+      });
+      
+      const result = await response.json();
+      
+      if (result.success) {
         toast.success("Login successful!");
+        
+        // Store user data in localStorage
+        localStorage.setItem('user', JSON.stringify(result.user));
+        
         reset();
         router.push("/landing");
       } else {
-        toast.error(result?.error || "Login failed");
+        toast.error(result.message || "Login failed");
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login error:", error);
-      toast.error(error?.message || "An unexpected error occurred");
+      const errorMessage = error instanceof Error ? error.message : "Login failed";
+      toast.error(errorMessage);
     }
   }
   
@@ -106,7 +114,7 @@ const Login = () => {
             </Button>
             
             <Link className='text-sm mt-3 text-right block' href={'/registration'}>
-              Don't have an account? <span className='underline'>Register</span>
+              Don&apos;t have an account? <span className='underline'>Register</span>
             </Link>
           </form>
         </CardContent>

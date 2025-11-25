@@ -2,37 +2,32 @@ import { NextResponse } from 'next/server';
 import { connectMongoDB } from '../../../lib/mongodb';
 import Contract from '../../../../models/Contract';
 import Vendor from '../../../../models/vendor';
-import Anomaly from '../../../../models/Anomaly';
 
 export async function GET() {
   try {
     await connectMongoDB();
-
-    const [
-      totalContracts,
-      totalValueResult,
-      flaggedContracts,
-      activeVendors
-    ] = await Promise.all([
-      
-      Contract.countDocuments(),
-      
-      Contract.aggregate([
-        { $group: { _id: null, total: { $sum: '$value' } } }
-      ]),
-      
-      Contract.countDocuments({ 
-        $or: [
-          { 'anomaly_flags.0': { $exists: true } },
-          { risk_level: { $in: ['high', 'critical'] } }
-        ]
-      }),
-      
-      
-      Vendor.countDocuments({ status: 'active' })
+    
+    // Get total contracts
+    const totalContracts = await Contract.countDocuments();
+    
+    // Get total contract value
+    const totalValueResult = await Contract.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalValue: { $sum: '$value' }
+        }
+      }
     ]);
-
-    const totalValue = totalValueResult[0]?.total || 0;
+    const totalValue = totalValueResult[0]?.totalValue || 0;
+    
+    // Get flagged contracts (contracts with anomaly flags)
+    const flaggedContracts = await Contract.countDocuments({
+      anomaly_flags: { $exists: true, $ne: [] }
+    });
+    
+    // Get active vendors
+    const activeVendors = await Vendor.countDocuments({ status: 'active' });
 
     return NextResponse.json({
       totalContracts,

@@ -1,16 +1,14 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from "next-auth/next"
 import { connectMongoDB } from '../../../lib/mongodb';
 import User from '../../../../models/users';
-import { auth } from '../../../lib/auth';
 
-// GET all users (admin only)
-export async function GET() {
+export async function POST(request: Request) {
   try {
-    const session = await getServerSession(auth) as any;
-    
+    const body = await request.json();
+    const { user } = body;
+
     // Check if user is admin
-    if (!session || session.user?.role !== 'admin') {
+    if (user?.role !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized - Admin access required' },
         { status: 403 }
@@ -19,15 +17,17 @@ export async function GET() {
 
     await connectMongoDB();
 
-    const users = await User.find({ role: { $in: ['journalist', 'public'] } })
-      .select('-password')
-      .sort({ createdAt: -1 });
+    const users = await User.find({ 
+      role: { $in: ['journalist', 'public'] } 
+    })
+    .select('-password')
+    .sort({ createdAt: -1 });
 
     return NextResponse.json(users);
   } catch (error) {
     console.error('Error fetching users:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to fetch users' },
       { status: 500 }
     );
   }
