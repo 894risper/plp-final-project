@@ -13,6 +13,8 @@ export interface IUser extends Document {
     verificationNotes?: string;
     verifiedBy?: Types.ObjectId;
     verifiedAt?: Date;
+    passwordResetToken?: string;
+    passwordResetExpires?: Date;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -36,7 +38,9 @@ const userSchema = new Schema<IUser>({
     organization: { type: String },
     verificationNotes: { type: String },
     verifiedBy: { type: Schema.Types.ObjectId, ref: 'User' },
-    verifiedAt: { type: Date }
+    verifiedAt: { type: Date },
+    passwordResetToken: { type: String },
+    passwordResetExpires: { type: Date }
 }, { 
     timestamps: true 
 });

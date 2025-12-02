@@ -7,22 +7,19 @@ import { Card } from '@/components/ui/card';
 import { Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useForm } from "react-hook-form"
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from "sonner" 
 
 type Inputs = {
   email: string,
-  password: string,
 }
 
-const Login = () => {
+const ForgotPassword = () => {
   const { register, handleSubmit, formState, reset } = useForm<Inputs>();
-  const router = useRouter()
   
   const handleFormSubmit = async (data: Inputs) => {
     try {
-      const response = await fetch("/api/login", {
+      const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -33,20 +30,15 @@ const Login = () => {
       const result = await response.json();
       
       if (result.success) {
-        toast.success("Login successful!");
-        
-        // Store user data in localStorage
-        localStorage.setItem('user', JSON.stringify(result.user));
-        
+        toast.success("Password reset link sent to your email!");
         reset();
-        router.push("/landing");
       } else {
-        toast.error(result.message || "Login failed");
+        toast.error(result.message || "Failed to send password reset link");
       }
 
     } catch (error: unknown) {
-      console.error("Login error:", error);
-      const errorMessage = error instanceof Error ? error.message : "Login failed";
+      console.error("Forgot password error:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred";
       toast.error(errorMessage);
     }
   }
@@ -58,9 +50,9 @@ const Login = () => {
           <div className='flex justify-center mb-4'>
             <Shield className="h-12 w-12 text-blue-900" />
           </div>
-          <CardTitle className='text-2xl'>Corruption Tracker</CardTitle>
+          <CardTitle className='text-2xl'>Forgot Password</CardTitle>
           <CardDescription>
-            Government Procurement Transparency Platform
+            Enter your email to receive a password reset link.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -85,40 +77,16 @@ const Login = () => {
               }
             </div>
             
-            <div>
-              <Label htmlFor='password'>Password</Label>
-              <Input 
-                id='password'
-                type='password'
-                {...register("password", {
-                  required: "The password is required",
-                  minLength: {
-                    value: 8,
-                    message: "Password should contain at least 8 characters" 
-                  }
-                })}
-              />
-              {formState.errors.password &&
-                <p className='text-red-500 text-sm mt-1'>
-                  {formState.errors.password.message}
-                </p>
-              }
-            </div>
-            
             <Button  
               className='bg-blue-900 w-full mt-5'
               type='submit'
               disabled={formState.isSubmitting}
             >
-              {formState.isSubmitting ? 'Logging in...' : 'Login'}
+              {formState.isSubmitting ? 'Sending...' : 'Send Reset Link'}
             </Button>
             
-            <Link className='text-sm mt-3 text-right block text-blue-900 underline' href={'/forgot-password'}>
-              Forgot password?
-            </Link>
-
-            <Link className='text-sm mt-3 text-right block' href={'/registration'}>
-              Don&apos;t have an account? <span className='underline'>Register</span>
+            <Link className='text-sm mt-3 text-right block' href={'/login'}>
+              Remember your password? <span className='underline'>Login</span>
             </Link>
           </form>
         </CardContent>
@@ -127,4 +95,4 @@ const Login = () => {
   )
 }
 
-export default Login
+export default ForgotPassword
